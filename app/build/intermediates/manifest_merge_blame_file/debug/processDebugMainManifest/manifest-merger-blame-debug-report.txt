@@ -1,0 +1,278 @@
+1<?xml version="1.0" encoding="utf-8"?>
+2<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+3    package="com.signallens.app"
+4    android:versionCode="1"
+5    android:versionName="0.1.0" >
+6
+7    <uses-sdk
+8        android:minSdkVersion="28"
+9        android:targetSdkVersion="35" />
+10
+11    <!-- Pleos 차량 데이터 읽기 권한: 쓰는 것만 선언 -->
+12    <uses-permission android:name="pleos.car.permission.CAR_LIGHTS" />
+12-->/Users/june/Workspace/pleos-accessibility-app/app/src/main/AndroidManifest.xml:5:5-71
+12-->/Users/june/Workspace/pleos-accessibility-app/app/src/main/AndroidManifest.xml:5:22-68
+13    <uses-permission android:name="pleos.car.permission.CAR_DOORS" />
+13-->/Users/june/Workspace/pleos-accessibility-app/app/src/main/AndroidManifest.xml:6:5-70
+13-->/Users/june/Workspace/pleos-accessibility-app/app/src/main/AndroidManifest.xml:6:22-67
+14    <uses-permission android:name="pleos.car.permission.CAR_WINDOWS" />
+14-->/Users/june/Workspace/pleos-accessibility-app/app/src/main/AndroidManifest.xml:7:5-72
+14-->/Users/june/Workspace/pleos-accessibility-app/app/src/main/AndroidManifest.xml:7:22-69
+15    <uses-permission android:name="pleos.car.permission.CAR_ENERGY" />
+15-->/Users/june/Workspace/pleos-accessibility-app/app/src/main/AndroidManifest.xml:8:5-71
+15-->/Users/june/Workspace/pleos-accessibility-app/app/src/main/AndroidManifest.xml:8:22-68
+16    <uses-permission android:name="pleos.car.permission.CAR_DRIVE" />
+16-->/Users/june/Workspace/pleos-accessibility-app/app/src/main/AndroidManifest.xml:9:5-70
+16-->/Users/june/Workspace/pleos-accessibility-app/app/src/main/AndroidManifest.xml:9:22-67
+17    <uses-permission android:name="pleos.car.permission.CAR_SPEED" />
+17-->/Users/june/Workspace/pleos-accessibility-app/app/src/main/AndroidManifest.xml:10:5-70
+17-->/Users/june/Workspace/pleos-accessibility-app/app/src/main/AndroidManifest.xml:10:22-67
+18
+19    <!-- AAOS 표준 속성 (속도 · 기어 · 주야간 · 주행 가능 거리) -->
+20    <uses-permission android:name="android.car.permission.CAR_SPEED" />
+20-->/Users/june/Workspace/pleos-accessibility-app/app/src/main/AndroidManifest.xml:13:5-72
+20-->/Users/june/Workspace/pleos-accessibility-app/app/src/main/AndroidManifest.xml:13:22-69
+21    <uses-permission android:name="android.car.permission.CAR_POWERTRAIN" />
+21-->/Users/june/Workspace/pleos-accessibility-app/app/src/main/AndroidManifest.xml:14:5-77
+21-->/Users/june/Workspace/pleos-accessibility-app/app/src/main/AndroidManifest.xml:14:22-74
+22    <uses-permission android:name="android.car.permission.CAR_ENERGY" />
+22-->/Users/june/Workspace/pleos-accessibility-app/app/src/main/AndroidManifest.xml:15:5-73
+22-->/Users/june/Workspace/pleos-accessibility-app/app/src/main/AndroidManifest.xml:15:22-70
+23    <uses-permission android:name="android.car.permission.CAR_EXTERIOR_ENVIRONMENT" />
+23-->/Users/june/Workspace/pleos-accessibility-app/app/src/main/AndroidManifest.xml:16:5-87
+23-->/Users/june/Workspace/pleos-accessibility-app/app/src/main/AndroidManifest.xml:16:22-84
+24
+25    <!-- "방금 뭐 켜졌어?" 음성 질문 -->
+26    <uses-permission android:name="android.permission.RECORD_AUDIO" />
+26-->/Users/june/Workspace/pleos-accessibility-app/app/src/main/AndroidManifest.xml:19:5-71
+26-->/Users/june/Workspace/pleos-accessibility-app/app/src/main/AndroidManifest.xml:19:22-68
+27
+28    <!-- 지도 화면에서도 감시 · 지도 위 알림 카드 -->
+29    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+29-->/Users/june/Workspace/pleos-accessibility-app/app/src/main/AndroidManifest.xml:22:5-77
+29-->/Users/june/Workspace/pleos-accessibility-app/app/src/main/AndroidManifest.xml:22:22-74
+30    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" />
+30-->/Users/june/Workspace/pleos-accessibility-app/app/src/main/AndroidManifest.xml:23:5-89
+30-->/Users/june/Workspace/pleos-accessibility-app/app/src/main/AndroidManifest.xml:23:22-86
+31    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
+31-->/Users/june/Workspace/pleos-accessibility-app/app/src/main/AndroidManifest.xml:24:5-78
+31-->/Users/june/Workspace/pleos-accessibility-app/app/src/main/AndroidManifest.xml:24:22-75
+32    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+32-->/Users/june/Workspace/pleos-accessibility-app/app/src/main/AndroidManifest.xml:25:5-77
+32-->/Users/june/Workspace/pleos-accessibility-app/app/src/main/AndroidManifest.xml:25:22-74
+33
+34    <queries>
+34-->/Users/june/Workspace/pleos-accessibility-app/app/src/main/AndroidManifest.xml:27:5-37:15
+35        <intent>
+35-->/Users/june/Workspace/pleos-accessibility-app/app/src/main/AndroidManifest.xml:28:9-30:18
+36            <action android:name="android.speech.RecognitionService" />
+36-->/Users/june/Workspace/pleos-accessibility-app/app/src/main/AndroidManifest.xml:29:13-72
+36-->/Users/june/Workspace/pleos-accessibility-app/app/src/main/AndroidManifest.xml:29:21-69
+37        </intent>
+38        <intent>
+38-->/Users/june/Workspace/pleos-accessibility-app/app/src/main/AndroidManifest.xml:31:9-33:18
+39            <action android:name="android.intent.action.TTS_SERVICE" />
+39-->/Users/june/Workspace/pleos-accessibility-app/app/src/main/AndroidManifest.xml:32:13-72
+39-->/Users/june/Workspace/pleos-accessibility-app/app/src/main/AndroidManifest.xml:32:21-69
+40        </intent>
+41        <intent>
+41-->/Users/june/Workspace/pleos-accessibility-app/app/src/main/AndroidManifest.xml:34:9-36:18
+42            <action android:name="android.intent.action.DIAL" />
+42-->/Users/june/Workspace/pleos-accessibility-app/app/src/main/AndroidManifest.xml:35:13-65
+42-->/Users/june/Workspace/pleos-accessibility-app/app/src/main/AndroidManifest.xml:35:21-62
+43        </intent>
+44        <intent>
+44-->[ai.pleos.playground:Vehicle:2.3.2] /Users/june/.gradle/caches/8.10.2/transforms/651b5208e89daaa24756ac5db34b65b6/transformed/Vehicle-2.3.2/AndroidManifest.xml:11:9-13:18
+45            <action android:name="ai.pleos.playground.vehicle.VEHICLE_START" />
+45-->[ai.pleos.playground:Vehicle:2.3.2] /Users/june/.gradle/caches/8.10.2/transforms/651b5208e89daaa24756ac5db34b65b6/transformed/Vehicle-2.3.2/AndroidManifest.xml:12:13-80
+45-->[ai.pleos.playground:Vehicle:2.3.2] /Users/june/.gradle/caches/8.10.2/transforms/651b5208e89daaa24756ac5db34b65b6/transformed/Vehicle-2.3.2/AndroidManifest.xml:12:21-77
+46        </intent>
+47    </queries>
+48
+49    <uses-permission android:name="ai.pleos.playground.service.vehicle.VEHICLE_BINDING" />
+49-->[ai.pleos.playground:Vehicle:2.3.2] /Users/june/.gradle/caches/8.10.2/transforms/651b5208e89daaa24756ac5db34b65b6/transformed/Vehicle-2.3.2/AndroidManifest.xml:8:5-91
+49-->[ai.pleos.playground:Vehicle:2.3.2] /Users/june/.gradle/caches/8.10.2/transforms/651b5208e89daaa24756ac5db34b65b6/transformed/Vehicle-2.3.2/AndroidManifest.xml:8:22-88
+50
+51    <permission
+51-->[androidx.core:core:1.16.0] /Users/june/.gradle/caches/8.10.2/transforms/21a99efc52f78cc2452448c45fd4423a/transformed/core-1.16.0/AndroidManifest.xml:22:5-24:47
+52        android:name="com.signallens.app.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION"
+52-->[androidx.core:core:1.16.0] /Users/june/.gradle/caches/8.10.2/transforms/21a99efc52f78cc2452448c45fd4423a/transformed/core-1.16.0/AndroidManifest.xml:23:9-81
+53        android:protectionLevel="signature" />
+53-->[androidx.core:core:1.16.0] /Users/june/.gradle/caches/8.10.2/transforms/21a99efc52f78cc2452448c45fd4423a/transformed/core-1.16.0/AndroidManifest.xml:24:9-44
+54
+55    <uses-permission android:name="com.signallens.app.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION" />
+55-->[androidx.core:core:1.16.0] /Users/june/.gradle/caches/8.10.2/transforms/21a99efc52f78cc2452448c45fd4423a/transformed/core-1.16.0/AndroidManifest.xml:26:5-97
+55-->[androidx.core:core:1.16.0] /Users/june/.gradle/caches/8.10.2/transforms/21a99efc52f78cc2452448c45fd4423a/transformed/core-1.16.0/AndroidManifest.xml:26:22-94
+56
+57    <application
+57-->/Users/june/Workspace/pleos-accessibility-app/app/src/main/AndroidManifest.xml:39:5-73:19
+58        android:name="com.signallens.app.SignalLensApp"
+58-->/Users/june/Workspace/pleos-accessibility-app/app/src/main/AndroidManifest.xml:40:9-38
+59        android:allowBackup="false"
+59-->/Users/june/Workspace/pleos-accessibility-app/app/src/main/AndroidManifest.xml:41:9-36
+60        android:appComponentFactory="androidx.core.app.CoreComponentFactory"
+60-->[androidx.core:core:1.16.0] /Users/june/.gradle/caches/8.10.2/transforms/21a99efc52f78cc2452448c45fd4423a/transformed/core-1.16.0/AndroidManifest.xml:28:18-86
+61        android:debuggable="true"
+62        android:extractNativeLibs="false"
+63        android:label="Signal Lens"
+63-->/Users/june/Workspace/pleos-accessibility-app/app/src/main/AndroidManifest.xml:42:9-36
+64        android:supportsRtl="true"
+64-->/Users/june/Workspace/pleos-accessibility-app/app/src/main/AndroidManifest.xml:43:9-35
+65        android:testOnly="true"
+66        android:theme="@style/Theme.SignalLens" >
+66-->/Users/june/Workspace/pleos-accessibility-app/app/src/main/AndroidManifest.xml:44:9-48
+67
+68        <!-- 차량 API. 없는 기기에서도 설치되게 required=false -->
+69        <uses-library
+69-->/Users/june/Workspace/pleos-accessibility-app/app/src/main/AndroidManifest.xml:47:9-49:40
+70            android:name="android.car"
+70-->/Users/june/Workspace/pleos-accessibility-app/app/src/main/AndroidManifest.xml:48:13-39
+71            android:required="false" />
+71-->/Users/june/Workspace/pleos-accessibility-app/app/src/main/AndroidManifest.xml:49:13-37
+72
+73        <activity
+73-->/Users/june/Workspace/pleos-accessibility-app/app/src/main/AndroidManifest.xml:51:9-64:20
+74            android:name="com.signallens.app.MainActivity"
+74-->/Users/june/Workspace/pleos-accessibility-app/app/src/main/AndroidManifest.xml:52:13-41
+75            android:configChanges="orientation|screenSize|screenLayout|smallestScreenSize|keyboardHidden|density"
+75-->/Users/june/Workspace/pleos-accessibility-app/app/src/main/AndroidManifest.xml:53:13-114
+76            android:exported="true" >
+76-->/Users/june/Workspace/pleos-accessibility-app/app/src/main/AndroidManifest.xml:54:13-36
+77            <intent-filter>
+77-->/Users/june/Workspace/pleos-accessibility-app/app/src/main/AndroidManifest.xml:55:13-58:29
+78                <action android:name="android.intent.action.MAIN" />
+78-->/Users/june/Workspace/pleos-accessibility-app/app/src/main/AndroidManifest.xml:56:17-69
+78-->/Users/june/Workspace/pleos-accessibility-app/app/src/main/AndroidManifest.xml:56:25-66
+79
+80                <category android:name="android.intent.category.LAUNCHER" />
+80-->/Users/june/Workspace/pleos-accessibility-app/app/src/main/AndroidManifest.xml:57:17-77
+80-->/Users/june/Workspace/pleos-accessibility-app/app/src/main/AndroidManifest.xml:57:27-74
+81            </intent-filter>
+82            <!--
+83                 주행 중에도 화면을 쓸 수 있는 앱이라는 표시 (AAOS 표준).
+84                 실제 허용 범위는 Pleos 주행 규제 정책을 따름
+85            -->
+86            <meta-data
+86-->/Users/june/Workspace/pleos-accessibility-app/app/src/main/AndroidManifest.xml:61:13-63:40
+87                android:name="distractionOptimized"
+87-->/Users/june/Workspace/pleos-accessibility-app/app/src/main/AndroidManifest.xml:62:17-52
+88                android:value="true" />
+88-->/Users/june/Workspace/pleos-accessibility-app/app/src/main/AndroidManifest.xml:63:17-37
+89        </activity>
+90
+91        <service
+91-->/Users/june/Workspace/pleos-accessibility-app/app/src/main/AndroidManifest.xml:65:9-72:19
+92            android:name="com.signallens.app.SignalLensService"
+92-->/Users/june/Workspace/pleos-accessibility-app/app/src/main/AndroidManifest.xml:66:13-46
+93            android:exported="false"
+93-->/Users/june/Workspace/pleos-accessibility-app/app/src/main/AndroidManifest.xml:67:13-37
+94            android:foregroundServiceType="specialUse" >
+94-->/Users/june/Workspace/pleos-accessibility-app/app/src/main/AndroidManifest.xml:68:13-55
+95            <property
+95-->/Users/june/Workspace/pleos-accessibility-app/app/src/main/AndroidManifest.xml:69:13-71:115
+96                android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
+96-->/Users/june/Workspace/pleos-accessibility-app/app/src/main/AndroidManifest.xml:70:17-76
+97                android:value="Driving assistance: voice alerts from vehicle signals while navigation is shown" />
+97-->/Users/june/Workspace/pleos-accessibility-app/app/src/main/AndroidManifest.xml:71:17-112
+98        </service>
+99
+100        <meta-data
+100-->[ai.pleos.playground:Vehicle:2.3.2] /Users/june/.gradle/caches/8.10.2/transforms/651b5208e89daaa24756ac5db34b65b6/transformed/Vehicle-2.3.2/AndroidManifest.xml:17:9-19:38
+101            android:name="ai.pleos.playground.service.vehicle.min_version_name"
+101-->[ai.pleos.playground:Vehicle:2.3.2] /Users/june/.gradle/caches/8.10.2/transforms/651b5208e89daaa24756ac5db34b65b6/transformed/Vehicle-2.3.2/AndroidManifest.xml:18:13-80
+102            android:value="2.3.13" />
+102-->[ai.pleos.playground:Vehicle:2.3.2] /Users/june/.gradle/caches/8.10.2/transforms/651b5208e89daaa24756ac5db34b65b6/transformed/Vehicle-2.3.2/AndroidManifest.xml:19:13-35
+103        <meta-data
+103-->[ai.pleos.playground:Vehicle:2.3.2] /Users/june/.gradle/caches/8.10.2/transforms/651b5208e89daaa24756ac5db34b65b6/transformed/Vehicle-2.3.2/AndroidManifest.xml:20:9-22:34
+104            android:name="ai.pleos.playground.service.vehicle.min_version_code"
+104-->[ai.pleos.playground:Vehicle:2.3.2] /Users/june/.gradle/caches/8.10.2/transforms/651b5208e89daaa24756ac5db34b65b6/transformed/Vehicle-2.3.2/AndroidManifest.xml:21:13-80
+105            android:value="65" />
+105-->[ai.pleos.playground:Vehicle:2.3.2] /Users/june/.gradle/caches/8.10.2/transforms/651b5208e89daaa24756ac5db34b65b6/transformed/Vehicle-2.3.2/AndroidManifest.xml:22:13-31
+106        <meta-data
+106-->[ai.pleos.playground:Vehicle:2.3.2] /Users/june/.gradle/caches/8.10.2/transforms/651b5208e89daaa24756ac5db34b65b6/transformed/Vehicle-2.3.2/AndroidManifest.xml:23:9-25:37
+107            android:name="ai.pleos.playground.sdk.vehicle.current_version_name"
+107-->[ai.pleos.playground:Vehicle:2.3.2] /Users/june/.gradle/caches/8.10.2/transforms/651b5208e89daaa24756ac5db34b65b6/transformed/Vehicle-2.3.2/AndroidManifest.xml:24:13-80
+108            android:value="2.3.2" />
+108-->[ai.pleos.playground:Vehicle:2.3.2] /Users/june/.gradle/caches/8.10.2/transforms/651b5208e89daaa24756ac5db34b65b6/transformed/Vehicle-2.3.2/AndroidManifest.xml:25:13-34
+109        <meta-data
+109-->[ai.pleos.playground:Vehicle:2.3.2] /Users/june/.gradle/caches/8.10.2/transforms/651b5208e89daaa24756ac5db34b65b6/transformed/Vehicle-2.3.2/AndroidManifest.xml:26:9-28:34
+110            android:name="ai.pleos.playground.sdk.vehicle.current_version_code"
+110-->[ai.pleos.playground:Vehicle:2.3.2] /Users/june/.gradle/caches/8.10.2/transforms/651b5208e89daaa24756ac5db34b65b6/transformed/Vehicle-2.3.2/AndroidManifest.xml:27:13-80
+111            android:value="73" />
+111-->[ai.pleos.playground:Vehicle:2.3.2] /Users/june/.gradle/caches/8.10.2/transforms/651b5208e89daaa24756ac5db34b65b6/transformed/Vehicle-2.3.2/AndroidManifest.xml:28:13-31
+112
+113        <activity
+113-->[androidx.compose.ui:ui-tooling-android:1.6.6] /Users/june/.gradle/caches/8.10.2/transforms/06a9128bf691da8f3f2ed0aece60813c/transformed/ui-tooling-release/AndroidManifest.xml:23:9-25:39
+114            android:name="androidx.compose.ui.tooling.PreviewActivity"
+114-->[androidx.compose.ui:ui-tooling-android:1.6.6] /Users/june/.gradle/caches/8.10.2/transforms/06a9128bf691da8f3f2ed0aece60813c/transformed/ui-tooling-release/AndroidManifest.xml:24:13-71
+115            android:exported="true" />
+115-->[androidx.compose.ui:ui-tooling-android:1.6.6] /Users/june/.gradle/caches/8.10.2/transforms/06a9128bf691da8f3f2ed0aece60813c/transformed/ui-tooling-release/AndroidManifest.xml:25:13-36
+116
+117        <provider
+117-->[androidx.emoji2:emoji2:1.3.0] /Users/june/.gradle/caches/8.10.2/transforms/3c5720c1c166662ce22efdf2f1be561f/transformed/emoji2-1.3.0/AndroidManifest.xml:24:9-32:20
+118            android:name="androidx.startup.InitializationProvider"
+118-->[androidx.emoji2:emoji2:1.3.0] /Users/june/.gradle/caches/8.10.2/transforms/3c5720c1c166662ce22efdf2f1be561f/transformed/emoji2-1.3.0/AndroidManifest.xml:25:13-67
+119            android:authorities="com.signallens.app.androidx-startup"
+119-->[androidx.emoji2:emoji2:1.3.0] /Users/june/.gradle/caches/8.10.2/transforms/3c5720c1c166662ce22efdf2f1be561f/transformed/emoji2-1.3.0/AndroidManifest.xml:26:13-68
+120            android:exported="false" >
+120-->[androidx.emoji2:emoji2:1.3.0] /Users/june/.gradle/caches/8.10.2/transforms/3c5720c1c166662ce22efdf2f1be561f/transformed/emoji2-1.3.0/AndroidManifest.xml:27:13-37
+121            <meta-data
+121-->[androidx.emoji2:emoji2:1.3.0] /Users/june/.gradle/caches/8.10.2/transforms/3c5720c1c166662ce22efdf2f1be561f/transformed/emoji2-1.3.0/AndroidManifest.xml:29:13-31:52
+122                android:name="androidx.emoji2.text.EmojiCompatInitializer"
+122-->[androidx.emoji2:emoji2:1.3.0] /Users/june/.gradle/caches/8.10.2/transforms/3c5720c1c166662ce22efdf2f1be561f/transformed/emoji2-1.3.0/AndroidManifest.xml:30:17-75
+123                android:value="androidx.startup" />
+123-->[androidx.emoji2:emoji2:1.3.0] /Users/june/.gradle/caches/8.10.2/transforms/3c5720c1c166662ce22efdf2f1be561f/transformed/emoji2-1.3.0/AndroidManifest.xml:31:17-49
+124            <meta-data
+124-->[androidx.lifecycle:lifecycle-process:2.9.0] /Users/june/.gradle/caches/8.10.2/transforms/24df05da5c2df1621e089b34eb6231cb/transformed/lifecycle-process-2.9.0/AndroidManifest.xml:29:13-31:52
+125                android:name="androidx.lifecycle.ProcessLifecycleInitializer"
+125-->[androidx.lifecycle:lifecycle-process:2.9.0] /Users/june/.gradle/caches/8.10.2/transforms/24df05da5c2df1621e089b34eb6231cb/transformed/lifecycle-process-2.9.0/AndroidManifest.xml:30:17-78
+126                android:value="androidx.startup" />
+126-->[androidx.lifecycle:lifecycle-process:2.9.0] /Users/june/.gradle/caches/8.10.2/transforms/24df05da5c2df1621e089b34eb6231cb/transformed/lifecycle-process-2.9.0/AndroidManifest.xml:31:17-49
+127            <meta-data
+127-->[androidx.profileinstaller:profileinstaller:1.4.0] /Users/june/.gradle/caches/8.10.2/transforms/c151d694c73fafec6337b86065a0f864/transformed/profileinstaller-1.4.0/AndroidManifest.xml:29:13-31:52
+128                android:name="androidx.profileinstaller.ProfileInstallerInitializer"
+128-->[androidx.profileinstaller:profileinstaller:1.4.0] /Users/june/.gradle/caches/8.10.2/transforms/c151d694c73fafec6337b86065a0f864/transformed/profileinstaller-1.4.0/AndroidManifest.xml:30:17-85
+129                android:value="androidx.startup" />
+129-->[androidx.profileinstaller:profileinstaller:1.4.0] /Users/june/.gradle/caches/8.10.2/transforms/c151d694c73fafec6337b86065a0f864/transformed/profileinstaller-1.4.0/AndroidManifest.xml:31:17-49
+130        </provider>
+131
+132        <receiver
+132-->[androidx.profileinstaller:profileinstaller:1.4.0] /Users/june/.gradle/caches/8.10.2/transforms/c151d694c73fafec6337b86065a0f864/transformed/profileinstaller-1.4.0/AndroidManifest.xml:34:9-52:20
+133            android:name="androidx.profileinstaller.ProfileInstallReceiver"
+133-->[androidx.profileinstaller:profileinstaller:1.4.0] /Users/june/.gradle/caches/8.10.2/transforms/c151d694c73fafec6337b86065a0f864/transformed/profileinstaller-1.4.0/AndroidManifest.xml:35:13-76
+134            android:directBootAware="false"
+134-->[androidx.profileinstaller:profileinstaller:1.4.0] /Users/june/.gradle/caches/8.10.2/transforms/c151d694c73fafec6337b86065a0f864/transformed/profileinstaller-1.4.0/AndroidManifest.xml:36:13-44
+135            android:enabled="true"
+135-->[androidx.profileinstaller:profileinstaller:1.4.0] /Users/june/.gradle/caches/8.10.2/transforms/c151d694c73fafec6337b86065a0f864/transformed/profileinstaller-1.4.0/AndroidManifest.xml:37:13-35
+136            android:exported="true"
+136-->[androidx.profileinstaller:profileinstaller:1.4.0] /Users/june/.gradle/caches/8.10.2/transforms/c151d694c73fafec6337b86065a0f864/transformed/profileinstaller-1.4.0/AndroidManifest.xml:38:13-36
+137            android:permission="android.permission.DUMP" >
+137-->[androidx.profileinstaller:profileinstaller:1.4.0] /Users/june/.gradle/caches/8.10.2/transforms/c151d694c73fafec6337b86065a0f864/transformed/profileinstaller-1.4.0/AndroidManifest.xml:39:13-57
+138            <intent-filter>
+138-->[androidx.profileinstaller:profileinstaller:1.4.0] /Users/june/.gradle/caches/8.10.2/transforms/c151d694c73fafec6337b86065a0f864/transformed/profileinstaller-1.4.0/AndroidManifest.xml:40:13-42:29
+139                <action android:name="androidx.profileinstaller.action.INSTALL_PROFILE" />
+139-->[androidx.profileinstaller:profileinstaller:1.4.0] /Users/june/.gradle/caches/8.10.2/transforms/c151d694c73fafec6337b86065a0f864/transformed/profileinstaller-1.4.0/AndroidManifest.xml:41:17-91
+139-->[androidx.profileinstaller:profileinstaller:1.4.0] /Users/june/.gradle/caches/8.10.2/transforms/c151d694c73fafec6337b86065a0f864/transformed/profileinstaller-1.4.0/AndroidManifest.xml:41:25-88
+140            </intent-filter>
+141            <intent-filter>
+141-->[androidx.profileinstaller:profileinstaller:1.4.0] /Users/june/.gradle/caches/8.10.2/transforms/c151d694c73fafec6337b86065a0f864/transformed/profileinstaller-1.4.0/AndroidManifest.xml:43:13-45:29
+142                <action android:name="androidx.profileinstaller.action.SKIP_FILE" />
+142-->[androidx.profileinstaller:profileinstaller:1.4.0] /Users/june/.gradle/caches/8.10.2/transforms/c151d694c73fafec6337b86065a0f864/transformed/profileinstaller-1.4.0/AndroidManifest.xml:44:17-85
+142-->[androidx.profileinstaller:profileinstaller:1.4.0] /Users/june/.gradle/caches/8.10.2/transforms/c151d694c73fafec6337b86065a0f864/transformed/profileinstaller-1.4.0/AndroidManifest.xml:44:25-82
+143            </intent-filter>
+144            <intent-filter>
+144-->[androidx.profileinstaller:profileinstaller:1.4.0] /Users/june/.gradle/caches/8.10.2/transforms/c151d694c73fafec6337b86065a0f864/transformed/profileinstaller-1.4.0/AndroidManifest.xml:46:13-48:29
+145                <action android:name="androidx.profileinstaller.action.SAVE_PROFILE" />
+145-->[androidx.profileinstaller:profileinstaller:1.4.0] /Users/june/.gradle/caches/8.10.2/transforms/c151d694c73fafec6337b86065a0f864/transformed/profileinstaller-1.4.0/AndroidManifest.xml:47:17-88
+145-->[androidx.profileinstaller:profileinstaller:1.4.0] /Users/june/.gradle/caches/8.10.2/transforms/c151d694c73fafec6337b86065a0f864/transformed/profileinstaller-1.4.0/AndroidManifest.xml:47:25-85
+146            </intent-filter>
+147            <intent-filter>
+147-->[androidx.profileinstaller:profileinstaller:1.4.0] /Users/june/.gradle/caches/8.10.2/transforms/c151d694c73fafec6337b86065a0f864/transformed/profileinstaller-1.4.0/AndroidManifest.xml:49:13-51:29
+148                <action android:name="androidx.profileinstaller.action.BENCHMARK_OPERATION" />
+148-->[androidx.profileinstaller:profileinstaller:1.4.0] /Users/june/.gradle/caches/8.10.2/transforms/c151d694c73fafec6337b86065a0f864/transformed/profileinstaller-1.4.0/AndroidManifest.xml:50:17-95
+148-->[androidx.profileinstaller:profileinstaller:1.4.0] /Users/june/.gradle/caches/8.10.2/transforms/c151d694c73fafec6337b86065a0f864/transformed/profileinstaller-1.4.0/AndroidManifest.xml:50:25-92
+149            </intent-filter>
+150        </receiver>
+151    </application>
+152
+153</manifest>
