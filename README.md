@@ -4,7 +4,7 @@
 
 현대자동차그룹 차량용 앱 개발 공모전 출품작입니다.
 
-- 설치 파일: [`apk/unjeonbiseo.apk`](apk/unjeonbiseo.apk)
+- 설치 파일: [`apk/박혜준_운전비서_release.apk`](apk/박혜준_운전비서_release.apk)
 - 실행 화면: [`ui/`](ui) 폴더
 
 ## 무엇을 하나요
@@ -25,7 +25,7 @@
 ## 실행 방법
 
 ### APK로 바로 실행
-Pleos Connect 에뮬레이터(v2.1.0, API 34)를 켠 뒤 `apk/unjeonbiseo.apk`를 에뮬레이터 화면에 끌어다 놓습니다.
+Pleos Connect 에뮬레이터(v2.1.0, API 34)를 켠 뒤 `apk/박혜준_운전비서_release.apk`를 에뮬레이터 화면에 끌어다 놓습니다.
 
 ### 소스에서 빌드
 1. Android Studio에서 이 폴더를 엽니다.
