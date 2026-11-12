@@ -46,6 +46,23 @@ $ADB shell appops set --user $($ADB shell am get-current-user) com.signallens.ap
 - **테스트 신호 쓰기**를 끄면 에뮬레이터의 실제 차량 신호로 동작합니다.
 - **음성 점검**에서 말하기 · 듣기 · 지도 위 카드 상태를 확인할 수 있습니다.
 
+## 테스트 환경과 필요한 설정
+
+| 항목 | 내용 |
+|---|---|
+| 에뮬레이터 | Pleos Connect Emulator v2.1.0 (Android 14, API 34, arm64 시스템 이미지) |
+| 화면 규격 | 2560 × 1440, 160dpi. 왼쪽 주행 정보 영역을 뺀 앱 창(가로)에서 확인 |
+| 개발 PC | macOS (Apple Silicon), Android Studio |
+| 빌드 | JDK 17, Gradle 8.10.2, Android Gradle Plugin 8.8.2, Kotlin 2.0.0 |
+| 앱 | minSdk 28, targetSdk 35, 패키지 `com.signallens.app` |
+
+필요한 설정
+
+1. 처음 실행하면 뜨는 권한(마이크, 알림, 차량 정보)을 허용합니다.
+2. 지도 위 알림 카드를 보려면 위의 '다른 앱 위에 표시' 명령을 한 번 실행합니다.
+3. 음성으로 대답하려면 에뮬레이터의 Extended controls → Microphone → **Enable Host Microphone Access**를 켭니다.
+4. 실제 유가 · 날씨 데이터를 쓰려면 아래 "사용한 SDK와 API"의 키를 넣습니다. 없어도 예시 데이터로 동작합니다.
+
 ## 사용한 SDK와 API
 
 | 구분 | 내용 |
