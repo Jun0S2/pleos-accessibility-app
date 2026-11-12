@@ -34,6 +34,11 @@ import com.signallens.app.vehicle.CarPropertySource
 import com.signallens.app.vehicle.PleosAutoSource
 import com.signallens.app.voice.Speaker
 import com.signallens.app.voice.VoiceInput
+import com.signallens.app.data.KmaForecast
+import com.signallens.app.data.OpinetStations
+import com.signallens.app.pleos.PleosListener
+import com.signallens.app.pleos.PleosNavi
+import com.signallens.app.pleos.PleosSpeaker
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -60,15 +65,30 @@ class AppController(private val ctx: Context) {
     // 주의: Speaker보다 먼저 만들어야 한다. 음성 엔진이 없으면 TTS가 생성 도중에 바로 콜백을 불러서,
     // main이 아직 없으면 앱이 켜지자마자 죽는다.
     private val main = Handler(Looper.getMainLooper())
-    private val speaker = Speaker(ctx) { text, ok ->
+    private val speaker = Speaker(ctx, onLog = { line -> main.post { addVoiceLog(line) } }) { text, ok ->
         main.post {
-            ttsStatus = text
-            ttsOk = ok
+            if (pleosTts?.ready != true) {
+                ttsStatus = text
+                ttsOk = ok
+            }
         }
     }
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
     private val stations: StationProvider = DemoStationProvider()
     private val forecast = DemoForecast()
+
+    // 실제 데이터 (키는 local.properties: opinet.key, kma.key)
+    private val opinet = OpinetStations(BuildConfig.OPINET_KEY) { m -> main.post { refreshDataStatus() } }
+    private val kma = KmaForecast(BuildConfig.KMA_KEY) { m -> main.post { refreshDataStatus() } }
+
+    // Pleos SDK: 음성(TTS · STT)과 내비. start()에서 만든다.
+    private var pleosTts: PleosSpeaker? = null
+    private var pleosStt: PleosListener? = null
+    private var navi: PleosNavi? = null
+    private var lat: Double? = null
+    private var lon: Double? = null
+    private var lastPoll = 0L
+    private var sttTimeout: Runnable? = null
 
     // ───────── 설정 ─────────
     var profile by mutableStateOf(prefs.profile)
@@ -182,24 +202,140 @@ class AppController(private val ctx: Context) {
     /** 앱 화면이 지금 보이는지. 안 보이면(지도 화면) 떠 있는 카드로 알린다. */
     var appVisible = false
         set(v) {
+            if (field == v) return
             field = v
+            Log.i(PleosAutoSource.TAG, "[카드] 앱 화면 보임 = $v")
             if (v) {
                 floating.hide()
+                floating.hideBubble()
             } else {
+                // 지도 화면에서도 말할 수 있게 작은 말하기 버튼을 띄운다
+                floating.showBubble()
                 // 알림이 떠 있는 채로 지도로 가면 지도 위에 다시 띄운다
                 current?.let { floatAlert(it) }
             }
             refreshChecks()
         }
 
+    fun micGranted() = voice.hasMicPermission()
+
     fun refreshChecks() {
-        sttStatus = voice.status()
+        sttStatus = when {
+            pleosStt?.ready == true -> pleosSttStatus
+            !voice.hasMicPermission() -> "마이크 권한이 꺼져 있어요"
+            else -> "${voice.status()} (Pleos STT: $pleosSttStatus)"
+        }
         overlayOk = floating.canShow()
+        refreshDataStatus()
+    }
+
+    private var pleosSttStatus = "확인 전"
+
+    /** 테스트 화면에 보이는 연동 상태 (내비 · 유가 · 날씨) */
+    var dataStatus by mutableStateOf("")
+        private set
+
+    private fun refreshDataStatus() {
+        val n = when {
+            navi?.ready != true -> "내비: 연결 안 됨"
+            real.routeRemainingKm != null -> "내비: 목적지까지 ${real.routeRemainingKm!!.toInt()}km"
+            else -> "내비: 연결됨 · 경로 없음"
+        }
+        dataStatus = "$n\n${opinet.status}\n${kma.status}"
+    }
+
+    /**
+     * Pleos 음성 SDK 연결. 차와 에뮬레이터의 한국어 음성은 이쪽으로만 나온다.
+     * 권한을 받은 뒤 다시 불러도 된다(이미 준비됐으면 건너뜀).
+     */
+    private fun initPleosVoice() {
+        if (pleosTts?.ready != true) {
+            pleosTts?.release()
+            pleosTts = PleosSpeaker(
+                ctx,
+                onLog = { line -> main.post { addVoiceLog(line) } },
+                onReady = { ok, msg ->
+                    main.post {
+                        addVoiceLog(msg)
+                        if (ok) {
+                            ttsStatus = msg
+                            ttsOk = true
+                        }
+                    }
+                },
+                // 질문으로 끝난 안내("경유지로 추가할까요?")는 말이 끝나면 바로 대답을 듣는다
+                onDone = {
+                    main.post {
+                        if (askAfterSpeech && !listening) {
+                            askAfterSpeech = false // 한 번만 자동으로 듣는다
+                            listen()
+                        }
+                    }
+                },
+            )
+        }
+        if (pleosStt?.ready != true) {
+            pleosStt?.release()
+            pleosStt = PleosListener(
+                ctx,
+                onText = { t ->
+                    main.post {
+                        clearSttTimeout()
+                        onVoice(t)
+                    }
+                },
+                onProblem = { m ->
+                    main.post {
+                        clearSttTimeout()
+                        say(m, float = true)
+                    }
+                },
+                onListening = { v ->
+                    main.post {
+                        listening = v
+                        if (!appVisible) floating.showBubble(listening = v)
+                        if (v && !appVisible) {
+                            floating.show(FloatModel(Level.INFO, "듣고 있어요", "말씀하세요", "예: 방금 뭐 켜졌어? · 사고 났어", sticky = false), profile)
+                        }
+                    }
+                },
+                onLog = { line -> main.post { addVoiceLog(line) } },
+                onLevel = { v -> main.post { micLevel = v } },
+                onReady = { _, msg ->
+                    main.post {
+                        pleosSttStatus = msg
+                        addVoiceLog(msg)
+                        refreshChecks()
+                    }
+                },
+            )
+        }
+    }
+
+    /** 방금 한 질문. 대답("응" / "아니")을 기다리는 중이면 값이 있다. */
+    private var pendingQuestion: AlertAction? = null
+    private var askAfterSpeech = false
+
+    private fun clearSttTimeout() {
+        sttTimeout?.let { main.removeCallbacks(it) }
+        sttTimeout = null
     }
 
     // ───────── 시작 · 종료 ─────────
     fun start() {
         speaker.setRate(profile.speechRate)
+        initPleosVoice()
+        navi = PleosNavi(
+            ctx,
+            onRemainKm = { km -> main.post { real = real.copy(routeRemainingKm = km) } },
+            onLocation = { la, lo ->
+                main.post {
+                    lat = la
+                    lon = lo
+                }
+            },
+            onLog = { m -> log(m) },
+        )
         pleosCount = pleos.start()
         simOn = pleosCount == 0 // SDK가 붙으면 실제 신호부터
         updateSourceInfo()
@@ -213,6 +349,7 @@ class AppController(private val ctx: Context) {
 
     /** 권한 응답 뒤에 호출 (속도 권한이 필요해서) */
     fun startCarProperty() {
+        initPleosVoice() // 권한을 방금 받았다면 여기서 다시 연결된다
         if (aaosCount > 0) return
         aaosCount = carProps.start()
         updateSourceInfo()
@@ -225,6 +362,9 @@ class AppController(private val ctx: Context) {
         carProps.stop()
         voice.release()
         speaker.release()
+        pleosTts?.release()
+        pleosStt?.release()
+        navi?.release()
     }
 
     private fun updateSourceInfo() {
@@ -248,7 +388,21 @@ class AppController(private val ctx: Context) {
     private fun tick() {
         val now = System.currentTimeMillis()
         val s = state
-        val cheapest = s.rangeKm?.let { stations.cheapestOnRoute(it) }
+        // 5초마다: 내비 값 요청, 위치가 있으면 유가 · 날씨 갱신
+        if (now - lastPoll > 5_000) {
+            lastPoll = now
+            navi?.poll()
+            val la = lat
+            val lo = lon
+            if (la != null && lo != null) {
+                opinet.refresh(la, lo, now)
+                kma.refresh(la, lo, now)
+            }
+            refreshDataStatus()
+        }
+        // 주유소: 오피넷 실제 값이 있으면 그것, 없으면 예시 (키가 있고 실제 차 신호일 때는 예시를 쓰지 않는다)
+        val cheapest = opinet.latest?.station
+            ?: if (opinet.enabled && !simOn) null else s.rangeKm?.let { stations.cheapestOnRoute(it) }
 
         val fresh = engine.update(s, now, cheapest)
         if (screen == Screen.DRIVE || screen == Screen.TEST) fresh.forEach(::deliver)
@@ -309,6 +463,8 @@ class AppController(private val ctx: Context) {
         }
         if (a.level != Level.INFO) speaker.chime(urgent = a.level == Level.STOP)
         if (!appVisible) floatAlert(a)
+        pendingQuestion = a.action // 질문이 있는 안내면 말이 끝난 뒤 대답을 듣는다
+        askAfterSpeech = a.action != null
         // 알림음 뒤에 말하도록 살짝 늦춘다
         main.postDelayed({ speak(a.speech, english(a.id)) }, if (a.level == Level.INFO) 0L else 350L)
     }
@@ -338,12 +494,15 @@ class AppController(private val ctx: Context) {
         "fuel_predict" -> "You do not have enough fuel to reach your destination. Refuel on the way."
         "fuel_low" -> "Your fuel range is low. Please refuel soon."
         "brake_coach" -> "A quick tip. Start braking earlier, and press gently."
-        else -> "Signal Lens. Please check the screen."
+        else -> "Please check the screen."
     }
 
     private fun speak(text: String, en: String? = null) {
         caption = text
         Log.i(PleosAutoSource.TAG, "[말함] $text")
+        // Pleos TTS(한국어)가 되면 그쪽으로, 안 되면 안드로이드 TTS로
+        val p = pleosTts
+        if (p != null && p.ready && p.speak(text)) return
         speaker.speak(text, en)
     }
 
@@ -351,7 +510,7 @@ class AppController(private val ctx: Context) {
     fun say(text: String, float: Boolean = false, en: String? = null) {
         speak(text, en)
         if (float && !appVisible) {
-            floating.show(FloatModel(Level.INFO, "Signal Lens", text, null, sticky = false), profile)
+            floating.show(FloatModel(Level.INFO, "운전비서", text, null, sticky = false), profile)
         }
     }
 
@@ -362,9 +521,11 @@ class AppController(private val ctx: Context) {
     }
 
     /** 테스트 패널: 음성 · 카드가 되는지 바로 확인 */
-    fun testVoice() {
+    /** 소리 테스트. media = true면 미디어(음악) 채널로 내보낸다 (에뮬레이터에서 내비 채널이 안 들릴 때) */
+    fun testVoice(media: Boolean = false) {
+        speaker.useMediaChannel(media)
         speaker.chime(urgent = false)
-        main.postDelayed({ speak("안녕하세요, 시그널 렌즈예요. 소리가 잘 들리나요?", "Hello, this is Signal Lens. Can you hear me?") }, 350)
+        main.postDelayed({ speak("안녕하세요, 운전비서예요. 소리가 잘 들리나요?", "Hello, this is your driving assistant. Can you hear me?") }, 350)
     }
 
     fun previewFloat() {
@@ -375,15 +536,31 @@ class AppController(private val ctx: Context) {
     }
 
     fun dismiss() {
+        pendingQuestion = null
+        askAfterSpeech = false
         current = null
+        stopSpeaking()
+    }
+
+    private fun stopSpeaking() {
         speaker.stop()
+        pleosTts?.stop()
     }
 
     fun onAction(a: AlertAction) {
         when (a) {
             AlertAction.ADD_STATION_WAYPOINT -> {
+                pendingQuestion = null
                 current = null
-                say("시연용 예시로 주유소를 경유지에 넣었어요. 실제 내비 연동은 준비 중이에요.")
+                val live = opinet.latest
+                val n = navi
+                if (live != null && n != null && n.ready && n.addWaypoint(live.lat, live.lon, live.station.name)) {
+                    say("${live.station.name}을 경유지에 추가했어요.", en = "Added the gas station as a waypoint.")
+                } else if (live != null) {
+                    say("내비에 경유지를 넣지 못했어요. ${live.station.name}을 직접 검색해 주세요.")
+                } else {
+                    say("예시 데이터라 경유지에는 넣지 않았어요. 유가 정보가 연결되면 실제 주유소를 넣어 드려요.")
+                }
             }
             AlertAction.FIND_SERVICE -> say("가까운 정비소 찾기는 준비 중이에요.")
         }
@@ -438,6 +615,12 @@ class AppController(private val ctx: Context) {
         private set
 
     fun askWhatsOn() {
+        val text = whatsOnText()
+        answer = text
+        say(text, float = true)
+    }
+
+    private fun whatsOnText(): String {
         val now = System.currentTimeMillis()
         val last = recent.firstOrNull()?.takeIf { now - it.first < 120_000 }?.second
         val s = state
@@ -458,8 +641,21 @@ class AppController(private val ctx: Context) {
             else append("지금은 ${on.joinToString(", ")} 상태예요.")
             s.rangeKm?.let { append(" 주행 가능 거리는 ${it.toInt()}킬로미터예요.") }
         }
-        answer = text
-        say(text, float = true)
+        return text
+    }
+
+    /**
+     * Gleo Interface: 글레오가 assets/schema.json의 함수를 부르면 답 문장을 돌려준다.
+     * 문장은 글레오가 읽어 주므로 여기서는 따로 말하지 않는다.
+     */
+    fun gleo(function: String): String? = when (function) {
+        "WHAT_IS_ON" -> whatsOnText().also { answer = it }
+        "FUEL_STATUS" -> fuelText()
+        "START_ACCIDENT_GUIDE" -> {
+            startAccident()
+            "사고 가이드를 시작할게요. 다친 사람이 있나요?"
+        }
+        else -> null
     }
 
     fun closeAnswer() {
@@ -468,7 +664,22 @@ class AppController(private val ctx: Context) {
 
     // ───────── 음성 명령 ─────────
     fun listen() {
-        speaker.stop() // 내 목소리를 듣도록 안내 음성은 멈춘다
+        stopSpeaking() // 내 목소리를 듣도록 안내 음성은 멈춘다
+        val p = pleosStt
+        if (p != null && p.ready && p.listen()) {
+            // 12초 동안 결과가 없으면 멈추고 이유를 알린다
+            clearSttTimeout()
+            val task = Runnable {
+                if (p.isActive) {
+                    p.cancel()
+                    addVoiceLog("12초 동안 응답 없음 (Pleos STT)")
+                    say("잘 못 들었어요. 다시 눌러 주세요.", float = true)
+                }
+            }
+            sttTimeout = task
+            main.postDelayed(task, 12_000)
+            return
+        }
         voice.listen()
     }
     fun voiceAvailable() = voice.available()
@@ -477,26 +688,49 @@ class AppController(private val ctx: Context) {
         Log.i(PleosAutoSource.TAG, "음성: $t")
         addVoiceLog("→ 명령으로 처리: \"$t\"")
         val g = guide
+        // 띄어쓰기 · 문장부호가 달라도 알아듣게 붙여서 비교한다 ("뭐 켜 졌어?" → "뭐켜졌어")
+        val heard = t
+        @Suppress("NAME_SHADOWING")
+        val t = t.lowercase().filter { it.isLetterOrDigit() }
+        fun has(vararg words: String) = words.any { t.contains(it) }
+        // 방금 한 질문에 대한 대답
+        val q = pendingQuestion
+        if (q != null) {
+            pendingQuestion = null
+            if (has("아니", "안해", "됐어", "괜찮", "싫", "no", "취소")) {
+                dismiss()
+                say("알겠어요.")
+                return
+            }
+            val yes = listOf("응", "네", "예", "어", "그래", "좋아", "yes", "ok", "okay").any { t.startsWith(it) } ||
+                has("추가", "해줘", "부탁", "안내해")
+            if (yes) {
+                onAction(q)
+                return
+            }
+        }
         when {
-            g != null && accidentStep == AccidentGuide.Step.START && (t.contains("없") || t.contains("괜찮") || t.contains("안 다")) ->
+            g != null && accidentStep == AccidentGuide.Step.START && (t.contains("없") || t.contains("괜찮") || t.contains("안다")) ->
                 answerInjury(false)
             g != null && accidentStep == AccidentGuide.Step.START && (t.contains("다쳤") || t.contains("있어") || t.contains("아파")) ->
                 answerInjury(true)
             g != null && (t.contains("다음") || t.contains("했어") || t.contains("켰어") || t.contains("열었")) -> accidentNext()
-            t.contains("사고") -> startAccident()
-            t.contains("기름") || t.contains("주유") || t.contains("연료") -> fuelAnswer()
-            t.contains("켜졌") || t.contains("뭐야") || t.contains("방금") || t.contains("불") || t.contains("경고") -> askWhatsOn()
-            else -> say("\"방금 뭐 켜졌어\"나 \"사고 났어\"라고 말해 주세요.", float = true)
+            has("사고", "박았", "부딪", "accident", "crash") -> startAccident()
+            has("기름", "주유", "연료", "배터리", "충전", "몇킬로", "얼마나갈", "fuel", "range", "battery") -> fuelAnswer()
+            has("켜졌", "켜졋", "켜져", "켜진", "켜", "뭐야", "뭐지", "뭐가", "뭐", "무슨", "방금", "지금", "불", "경고", "알림", "상태",
+                "what", "lit", "light", "warning", "on") -> askWhatsOn()
+            else -> say("\"$heard\"라고 들었어요. \"방금 뭐 켜졌어\"나 \"사고 났어\"라고 말해 주세요.", float = true)
         }
     }
 
-    private fun fuelAnswer() {
+    private fun fuelAnswer() = say(fuelText(), float = true)
+
+    private fun fuelText(): String {
         val s = state
         val r = s.rangeKm
         val route = s.routeRemainingKm
-        say(
-            float = true,
-            text = when {
+        return (
+            when {
                 r == null -> "주행 가능 거리를 아직 못 받았어요."
                 route != null && r < route -> "목적지까지 ${route.toInt()}킬로미터, 주행 가능 거리는 ${r.toInt()}킬로미터예요. 가는 길에 주유가 필요해요."
                 route != null -> "목적지까지 ${route.toInt()}킬로미터, 주행 가능 거리는 ${r.toInt()}킬로미터예요. 충분해요."
@@ -507,7 +741,9 @@ class AppController(private val ctx: Context) {
 
     // ───────── 주차 요약 ─────────
     private fun showParking() {
-        val p = ParkingSummary.build(state, forecast.tomorrow(), brake)
+        // 테스트 패널에서 비 · 눈을 켰으면 그 예시를, 아니면 기상청 실제 예보를 쓴다
+        val fc = forecast.tomorrow() ?: kma.latest
+        val p = ParkingSummary.build(state, fc, brake)
         parking = p
         current = null
         screen = Screen.PARKING
@@ -585,7 +821,7 @@ class AppController(private val ctx: Context) {
         guide = null
         accidentStep = null
         screen = Screen.DRIVE
-        speaker.stop()
+        stopSpeaking()
     }
 
     fun dial(number: String) {

@@ -97,16 +97,29 @@ class AlertEngine(
                 val r = range!!.toInt()
                 val d = route!!.toInt()
                 val st = cheapest?.takeIf { it.distanceKm < range }
-                val where = if (st != null) {
-                    val price = st.pricePerLiter?.let { " · ${it}원/L" } ?: ""
-                    "경로상 ${st.distanceKm.toInt()}km 뒤 ${st.name}${price}"
-                } else "경로상 주유소를 찾고 있어요"
+                val price = st?.pricePerLiter?.let { " · ${it}원/L" } ?: ""
+                // 실제 유가 데이터(오피넷)는 '현재 위치 근처 최저가', 예시 데이터는 '경로상'으로 말한다
+                val live = st != null && !st.isDemo
+                val km = st?.let { if (it.distanceKm < 10f) "%.1f".format(it.distanceKm) else it.distanceKm.toInt().toString() } ?: ""
+                val where = when {
+                    st == null -> "경로상 주유소를 찾고 있어요"
+                    live -> "근처에서 가장 싼 곳은 ${st.name}(${km}km$price)"
+                    else -> "경로상 ${st.distanceKm.toInt()}km 뒤 ${st.name}${price}"
+                }
                 out += Alert(
                     "fuel_predict", Level.CAUTION,
-                    title = if (st != null) "${st.distanceKm.toInt()}km 뒤에서 주유하세요" else "가는 길에 주유가 필요해요",
+                    title = when {
+                        st == null -> "가는 길에 주유가 필요해요"
+                        live -> "가까운 주유소에서 주유하세요"
+                        else -> "${st.distanceKm.toInt()}km 뒤에서 주유하세요"
+                    },
                     detail = "목적지까지 ${d}km, 주행 가능 거리는 ${r}km예요. $where",
                     speech = "목적지까지 ${d}킬로미터 남았는데 주행 가능 거리는 ${r}킬로미터예요." +
-                        (st?.let { " 경로상 ${it.distanceKm.toInt()}킬로미터 뒤 주유소가 그중 제일 싸요. 안내할까요?" } ?: ""),
+                        when {
+                            st == null -> ""
+                            live -> " 근처에서 가장 싼 주유소는 ${st.name}이에요. 경유지로 추가할까요?"
+                            else -> " 경로상 ${st.distanceKm.toInt()}킬로미터 뒤 주유소가 그중 제일 싸요. 안내할까요?"
+                        },
                     shortTitle = "기름 넣을 때예요",
                     action = if (st != null) AlertAction.ADD_STATION_WAYPOINT else null,
                 )

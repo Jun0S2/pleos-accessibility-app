@@ -35,11 +35,11 @@ class SignalLensService : Service() {
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         val nm = getSystemService(NotificationManager::class.java)
         if (Build.VERSION.SDK_INT >= 26) {
-            nm.createNotificationChannel(NotificationChannel(CHANNEL, "Signal Lens 주행 감시", NotificationManager.IMPORTANCE_LOW))
+            nm.createNotificationChannel(NotificationChannel(CHANNEL, "운전비서 주행 감시", NotificationManager.IMPORTANCE_LOW))
         }
         val n: Notification = Notification.Builder(this, CHANNEL)
             .setSmallIcon(android.R.drawable.ic_dialog_info)
-            .setContentTitle("Signal Lens")
+            .setContentTitle("운전비서")
             .setContentText("차 신호를 보고 있어요")
             .setOngoing(true)
             .build()

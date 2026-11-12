@@ -1,63 +1,104 @@
-# Signal Lens — Pleos Connect 앱
+# 운전비서
 
-"감지는 차가, 번역(Explain)과 예측(Predict)은 앱이."
-초보 · 고령 · 색각이상 운전자를 위한 음성 우선 운전 보조 앱.
+초보 · 고령 · 색각이상 운전자도 쉽게 알아들을 수 있게, 차가 감지한 신호를 음성으로 알려주고 운전을 보조하는 Pleos Connect 앱입니다.
 
-## 실행
-1. Android Studio에서 이 폴더 열기 → Sync
-2. Pleos Connect 에뮬레이터(API 34) 켜고 ▶ Run
-3. 처음 화면에서 운전자 프로필 고르기 (색 구분 테스트 있음)
+현대자동차그룹 차량용 앱 개발 공모전 출품작입니다.
 
-## 들어 있는 기능
-| 기능 | 어디서 |
+- 설치 파일: [`apk/unjeonbiseo.apk`](apk/unjeonbiseo.apk)
+- 실행 화면: [`ui/`](ui) 폴더
+
+## 무엇을 하나요
+
+차는 방향지시등, 라이트, 문, 연료 상태를 이미 알고 있습니다. 하지만 운전자에게는 작은 아이콘과 색으로만 전달됩니다. 운전비서는 그 신호를 "무엇이 · 왜 · 지금 할 일"로 바꿔 말해 줍니다.
+
+| 기능 | 설명 |
 |---|---|
-| 운전자 프로필 3종 + 색 구분 테스트 | 첫 화면 / 설정 |
-| 깜빡이 장시간 (1분, 시연 10초) | engine/AlertEngine |
-| 밝은데 상향등 (5분, 시연 20초) · 밤에 전조등 꺼짐 | engine/AlertEngine |
-| 문 · 트렁크 열고 주행 | engine/AlertEngine |
-| 연료 예측 (남은 경로 > 주행 가능 거리) + 경로상 주유소 [예시] | engine/AlertEngine, data/Prefs |
-| 브레이크 습관 (세게 · 늦게 · 여러 번) → 멈춘 뒤에만 한마디 | engine/BrakeCoach |
-| "방금 뭐 켜졌어?" (버튼 · 음성) | AppController.askWhatsOn |
-| 주차 요약 (기어 P): 내일 비·눈 [예시] × 열린 창문, 가족 요약 공유 | engine/ParkingSummary |
-| "사고 났어" 단계 가이드, 차 신호로 단계 자동 확인, 119 · 1588-2504 · 보험사 | engine/AccidentGuide |
+| 상시 알림 | 깜빡이를 1분 넘게 켜 둠, 밝은데 상향등, 어두운데 전조등 꺼짐, 문 · 트렁크를 연 채 주행 |
+| 예측형 경고 | 목적지까지 남은 거리보다 주행 가능 거리가 짧으면 미리 알리고 근처 최저가 주유소를 경유지로 제안 |
+| 운전자 프로필 | 초보 / 크게 · 천천히 / 색 구분이 어려워요 (색 구분 테스트 포함). 경고는 색이 아니라 모양(○ △ □)과 글자로 구분 |
+| 브레이크 코칭 | 세게 · 늦게 · 여러 번 밟는 습관이 반복되면, 완전히 멈춘 뒤에 한마디 |
+| 음성 대화 | "방금 뭐 켜졌어?", "기름 얼마나 남았어?", "사고 났어". 질문으로 끝난 안내에는 "응 / 아니"로 대답 |
+| 사고 대응 가이드 | 비상등 → 트렁크 → 대피 → 신고 순서로 안내하고, 각 단계를 차량 신호로 확인 |
+| 주차 요약 | 기어를 P에 넣으면 내일 비 · 눈 예보와 열린 창문을 함께 안내 |
+| 지도 위 알림 | 앱을 닫고 내비를 보고 있어도 작은 카드와 음성으로 안내 |
 
-## 테스트 신호 목록
-주행 화면 아래 **테스트 신호 목록**.
-- 음성 점검: 말하기 · 듣기 · 지도 위 카드가 되는지 ✓/✕로 표시
-- "테스트 신호 쓰기"를 켜면 가짜 차 신호로, 끄면 실제 차(가상 콘솔) 신호로 동작
-- 상황 바로 만들기: 깜빡이 켠 채로 주행 / 낮인데 상향등 / 밤인데 라이트 꺼짐 / 뒷문 열린 채 출발 / 기름 부족 / 창문 열고 주차 직전(→ P 누르면 주차 요약)
+## 실행 방법
 
-## 지도 위 알림 카드
-앱 화면을 닫고 지도로 가면, 알림이 지도 왼쪽 위에 작은 카드로 뜨고 음성으로도 말해요.
-'다른 앱 위에 표시' 권한이 필요해요. 차 화면에 설정 메뉴가 없으면 Android Studio 아래 Terminal 탭에서:
+### APK로 바로 실행
+Pleos Connect 에뮬레이터(v2.1.0, API 34)를 켠 뒤 `apk/unjeonbiseo.apk`를 에뮬레이터 화면에 끌어다 놓습니다.
 
-    # 차(AAOS)는 운전자 사용자 번호가 0이 아니라 보통 10이라 --user를 꼭 붙인다
-    ADB=~/Library/Android/sdk/platform-tools/adb
-    $ADB shell appops set --user $($ADB shell am get-current-user) com.signallens.app SYSTEM_ALERT_WINDOW allow
+### 소스에서 빌드
+1. Android Studio에서 이 폴더를 엽니다.
+2. Sync 후 Pleos Connect 에뮬레이터에서 실행합니다.
+3. 처음 화면에서 운전자 프로필을 고릅니다.
 
-## 소리 · 마이크가 안 될 때
-1. 에뮬레이터 옆 ⋯ (Extended controls) → Microphone → "Virtual microphone uses host audio input" 켜기
-2. macOS 시스템 설정 → 개인정보 보호 및 보안 → 마이크 → Android Studio 허용
-3. 음성 엔진 확인 (Terminal):
+지도 위 알림 카드에는 '다른 앱 위에 표시' 권한이 필요합니다.
 
-       ~/Library/Android/sdk/platform-tools/adb shell pm list packages | grep -iE "tts|speech|voice|google"
+```bash
+ADB=~/Library/Android/sdk/platform-tools/adb
+$ADB shell appops set --user $($ADB shell am get-current-user) com.signallens.app SYSTEM_ALERT_WINDOW allow
+```
 
-- 브레이크: 급정거 · 늦게 꾹 · 여러 번 밟기를 2번 하면(시연 기준) 멈춘 뒤 코칭
+### 시연하는 법
+주행 화면의 **테스트 신호 목록**에서 차량 신호를 직접 만들 수 있습니다.
 
-## 차 신호 연결
-- `vehicle/PleosAutoSource.kt`: Pleos Vehicle SDK 2.3.2의 register 함수를 자동으로 찾아 구독
-- `vehicle/CarPropertySource.kt`: AAOS 표준 속도 · 기어 · 주야간 · 주행 가능 거리
-- Logcat에서 `SignalLens` 태그로 구독 목록과 들어온 값을 볼 수 있음
+- **상황 바로 만들기**: 깜빡이 켠 채로 주행 / 낮인데 상향등 / 밤인데 라이트 꺼짐 / 뒷문 열린 채 출발 / 기름 부족 / 창문 열고 주차 직전
+- **테스트 신호 쓰기**를 끄면 에뮬레이터의 실제 차량 신호로 동작합니다.
+- **음성 점검**에서 말하기 · 듣기 · 지도 위 카드 상태를 확인할 수 있습니다.
 
-## 아직 예시인 것
-- 주유소 가격: 오피넷 오픈API 키 필요 → `StationProvider` 구현
-- 내일 날씨: 기상청 단기예보(공공데이터포털) 키 필요 → `DemoForecast` 교체
-- 계기판 경고등(Telltale) · 타이어 공기압 API는 공식 샘플에서 비공개라 사용 안 함
-- 음성: Pleos TTS/STT가 "준비 중"이라 안드로이드 기본 TTS · 음성 인식 사용
+## 사용한 SDK와 API
+
+| 구분 | 내용 |
+|---|---|
+| Pleos Vehicle SDK 2.3.2 | 방향지시등, 라이트, 도어, 창문, 주행 상태, 연료 · 배터리, 브레이크 |
+| Pleos TextToSpeech · SpeechToText 3.3.1 | 한국어 음성 안내와 음성 인식 (ON_DEVICE) |
+| Pleos NaviHelper 3.0.5 | 목적지까지 남은 거리, 경유지 추가 |
+| Gleo Interface | 글레오가 부를 수 있는 기능 3개 등록 (`assets/schema.json`) |
+| AAOS CarPropertyManager | 차속, 기어, 주야간, 주행 가능 거리 |
+| 오피넷 오픈API | 현재 위치 근처 최저가 주유소 |
+| 기상청 단기예보 | 내일 비 · 눈 예보 |
+
+외부 API 키는 `local.properties`에 넣습니다. 키가 없으면 `[예시]` 데이터로 동작합니다.
+
+```
+opinet.key=오피넷 키
+kma.key=기상청 단기예보 키
+```
+
+## 코드 구조
+
+```
+app/src/main/java/com/signallens/app/
+├── engine/     판단 로직 (순수 Kotlin, 안드로이드 의존 없음)
+│   ├── AlertEngine      상시 알림 · 예측형 경고
+│   ├── BrakeCoach       브레이크 패턴
+│   ├── AccidentGuide    사고 대응 단계
+│   └── ParkingSummary   주차 요약
+├── vehicle/    차량 신호 구독 (Vehicle SDK, AAOS 속성)
+├── pleos/      Pleos 음성 · 내비 SDK 연결
+├── data/       오피넷, 기상청, 설정 저장
+├── voice/      안드로이드 기본 음성 (Pleos 음성을 못 쓸 때 대체)
+├── ui/         화면 (Jetpack Compose), 지도 위 카드
+├── AppController.kt   신호 → 판단 → 화면 · 음성
+└── GleoReceiver.kt    Gleo Interface 수신
+```
 
 ## 테스트
-`app/src/test/.../EngineTest.kt` 왼쪽 ▶ → 에뮬레이터 없이 규칙 11개 검사
 
-## 실시간 로그
-    ~/Library/Android/sdk/platform-tools/adb logcat -s SignalLens
-[음성] 들은 말, [말함] 앱이 한 말, 차 신호가 실시간으로 나와요. 앱 화면에도 🎤 음성 로그가 떠요.
+`app/src/test/java/com/signallens/app/engine/EngineTest.kt`에 판단 로직 시나리오 테스트 11개가 있습니다. 에뮬레이터 없이 실행됩니다.
+
+## 현재 상태
+
+| 항목 | 상태 |
+|---|---|
+| 차량 신호 구독, 상시 알림, 프로필, 사고 가이드, 주차 요약 | 에뮬레이터에서 동작 확인 |
+| 한국어 음성 안내와 음성 인식 | 에뮬레이터에서 동작 확인 |
+| NaviHelper, 오피넷, 기상청, Gleo Interface | 구현, 검증 중 |
+| 전기차용 충전 안내, 계기판 경고등 연동 | 예정 |
+
+## 안전 설계
+
+- 안내는 음성이 기본이고, 화면에는 큰 글자 카드 한 장만 띄웁니다.
+- 설정은 차가 멈췄을 때만 열립니다.
+- 같은 안내는 반복을 줄이고, 급하지 않은 안내(브레이크 코칭)는 정차 후에 합니다.
+- 사고 가이드는 과실이나 법적 판단을 하지 않습니다.

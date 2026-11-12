@@ -1,0 +1,35 @@
+{
+  "packageName": "com.signallens.app",
+  "appDescription": "A driving assistant that explains vehicle signals in plain words for novice, elderly and color-blind drivers. It tells what was just alerted, what is currently on or open, the remaining driving range, and guides the driver step by step after a minor accident.",
+  "invokeWord": "운전비서",
+  "version": "1.0.0",
+  "actionCalls": [
+    {
+      "type": "function",
+      "function": {
+        "name": "WHAT_IS_ON",
+        "description": "Explain the most recent alert and what is currently on or open in the car (turn signal, lights, doors, windows, driving range). Use when the driver asks what just turned on or what a warning means.",
+        "parameters": {"type": "object", "properties": {}, "required": []},
+        "component": "service"
+      }
+    },
+    {
+      "type": "function",
+      "function": {
+        "name": "FUEL_STATUS",
+        "description": "Tell the remaining driving range and whether it is enough to reach the current navigation destination.",
+        "parameters": {"type": "object", "properties": {}, "required": []},
+        "component": "service"
+      }
+    },
+    {
+      "type": "function",
+      "function": {
+        "name": "START_ACCIDENT_GUIDE",
+        "description": "Start the step-by-step guide after a minor accident: hazard lights, open the trunk, move to safety, then call for help.",
+        "parameters": {"type": "object", "properties": {}, "required": []},
+        "component": "service"
+      }
+    }
+  ]
+}

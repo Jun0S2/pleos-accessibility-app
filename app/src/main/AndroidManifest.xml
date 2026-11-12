@@ -15,6 +15,15 @@
     <uses-permission android:name="android.car.permission.CAR_ENERGY" />
     <uses-permission android:name="android.car.permission.CAR_EXTERIOR_ENVIRONMENT" />
 
+    <!-- Pleos 음성 · 내비 SDK -->
+    <uses-permission android:name="pleos.car.permission.TTS_SERVICE" />
+    <uses-permission android:name="pleos.car.permission.STT_SERVICE" />
+    <uses-permission android:name="pleos.car.permission.NAVI_ROUTE" />
+    <uses-permission android:name="pleos.car.permission.NAVI_ROUTE_SEARCH" />
+
+    <!-- 오피넷 유가 · 기상청 예보 -->
+    <uses-permission android:name="android.permission.INTERNET" />
+
     <!-- "방금 뭐 켜졌어?" 음성 질문 -->
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
 
@@ -39,7 +48,7 @@
     <application
         android:name=".SignalLensApp"
         android:allowBackup="false"
-        android:label="Signal Lens"
+        android:label="운전비서"
         android:supportsRtl="true"
         android:theme="@style/Theme.SignalLens">
 
@@ -62,6 +71,20 @@
                 android:name="distractionOptimized"
                 android:value="true" />
         </activity>
+        <!-- Gleo Interface: 글레오가 assets/schema.json의 함수를 부를 때 받는 곳 -->
+        <receiver
+            android:name=".GleoReceiver"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="WHAT_IS_ON" />
+                <action android:name="FUEL_STATUS" />
+                <action android:name="START_ACCIDENT_GUIDE" />
+                <action android:name="com.signallens.app.WHAT_IS_ON" />
+                <action android:name="com.signallens.app.FUEL_STATUS" />
+                <action android:name="com.signallens.app.START_ACCIDENT_GUIDE" />
+            </intent-filter>
+        </receiver>
+
         <service
             android:name=".SignalLensService"
             android:exported="false"

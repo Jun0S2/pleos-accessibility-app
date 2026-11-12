@@ -33,14 +33,31 @@ class MainActivity : ComponentActivity() {
         }
     }
 
+    // 앱 화면이 실제로 맨 앞에 있는지. Pleos는 창을 나눠 쓰기 때문에 내비로 넘어가도
+    // 액티비티가 '정지'되지 않을 수 있다. 그래서 정지 여부와 창 포커스를 함께 본다.
+    private var started = false
+    private var focused = false
+
+    private fun updateVisible() {
+        controller.appVisible = started && focused
+    }
+
     override fun onStart() {
         super.onStart()
-        controller.appVisible = true
+        started = true
+        updateVisible()
     }
 
     override fun onStop() {
-        controller.appVisible = false
+        started = false
+        updateVisible()
         super.onStop()
+    }
+
+    override fun onWindowFocusChanged(hasFocus: Boolean) {
+        super.onWindowFocusChanged(hasFocus)
+        focused = hasFocus
+        updateVisible()
     }
 
     private fun askPermissions() {
@@ -48,6 +65,10 @@ class MainActivity : ComponentActivity() {
             arrayOf(
                 Manifest.permission.RECORD_AUDIO,
                 Manifest.permission.POST_NOTIFICATIONS,
+                "pleos.car.permission.TTS_SERVICE",
+                "pleos.car.permission.STT_SERVICE",
+                "pleos.car.permission.NAVI_ROUTE",
+                "pleos.car.permission.NAVI_ROUTE_SEARCH",
                 "android.car.permission.CAR_SPEED",
                 "android.car.permission.CAR_POWERTRAIN",
                 "android.car.permission.CAR_ENERGY",

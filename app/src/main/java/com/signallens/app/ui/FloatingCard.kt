@@ -12,6 +12,7 @@ import android.graphics.drawable.GradientDrawable
 import android.os.Handler
 import android.os.Looper
 import android.provider.Settings
+import android.util.Log
 import android.view.Gravity
 import android.view.View
 import android.view.WindowManager
@@ -39,15 +40,69 @@ data class FloatModel(
  * 카드 누르기 → 앱 열기 / 🎤 누르기 → 바로 말하기
  */
 class FloatingCard(private val ctx: Context, private val onMic: () -> Unit) {
+    private val TAG = "SignalLens"
     private val wm = ctx.getSystemService(Context.WINDOW_SERVICE) as WindowManager
     private val main = Handler(Looper.getMainLooper())
     private var root: LinearLayout? = null
     private var hideTask: Runnable? = null
 
-    // 위치 · 크기 (2560×1440 Pleos 화면 기준 px, 지도 왼쪽 위)
-    var x = 880
-    var y = 150
+    // 위치 · 크기 (2560×1440 Pleos 화면 기준 px).
+    // 지도 왼쪽 위에는 내비의 회전 안내(다음 방향 · 거리)가 있어서, 그 오른쪽 빈 곳에 띄운다.
+    var x = 1480
+    var y = 110
     var widthPx = 900
+
+    // 지도 화면에 늘 떠 있는 작은 말하기 버튼 (오른쪽 위 '2D' 버튼 아래)
+    private var bubble: TextView? = null
+    var bubbleX = 2400
+    var bubbleY = 240
+    var bubbleSize = 120
+
+    /** 앱 화면이 안 보일 때(지도 화면) 말하기 버튼을 띄운다. 누르면 바로 듣기 시작. */
+    fun showBubble(listening: Boolean = false) {
+        main.post {
+            if (!canShow()) {
+                Log.i(TAG, "[카드] 말하기 버튼: 권한 없음")
+                return@post
+            }
+            val d = ctx.resources.displayMetrics.density
+            val b = bubble ?: TextView(ctx).apply {
+                text = "🎤"
+                textSize = 40f
+                gravity = Gravity.CENTER
+                setOnClickListener { onMic() }
+                val lp = WindowManager.LayoutParams(
+                    bubbleSize, bubbleSize,
+                    WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
+                    WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN,
+                    PixelFormat.TRANSLUCENT,
+                ).apply {
+                    gravity = Gravity.TOP or Gravity.START
+                    x = bubbleX
+                    y = bubbleY
+                }
+                runCatching { wm.addView(this, lp) }
+                    .onSuccess {
+                        bubble = this
+                        Log.i(TAG, "[카드] 말하기 버튼 띄움 ($bubbleX, $bubbleY)")
+                    }
+                    .onFailure { Log.w(TAG, "[카드] 말하기 버튼 실패: ${it.message}", it) }
+            }
+            // 듣는 중이면 테두리를 밝게
+            b.background = GradientDrawable().apply {
+                shape = GradientDrawable.OVAL
+                setColor(if (listening) 0xFF00D1FF.toInt() else 0xEE0B1A3A.toInt())
+                setStroke((3 * d).toInt(), 0xFF00D1FF.toInt())
+            }
+        }
+    }
+
+    fun hideBubble() {
+        main.post {
+            bubble?.let { runCatching { wm.removeView(it) } }
+            bubble = null
+        }
+    }
 
     fun canShow(): Boolean = Settings.canDrawOverlays(ctx)
 
@@ -61,7 +116,10 @@ class FloatingCard(private val ctx: Context, private val onMic: () -> Unit) {
 
     @SuppressLint("SetTextI18n")
     private fun showNow(m: FloatModel, profile: Profile) {
-        if (!canShow()) return
+        if (!canShow()) {
+            Log.i(TAG, "[카드] 알림 카드: 권한 없음")
+            return
+        }
         removeNow()
         val color = levelColor(m.level, profile).toArgb()
         val scale = if (profile == Profile.ELDER) 1.3f else 1f
@@ -126,7 +184,12 @@ class FloatingCard(private val ctx: Context, private val onMic: () -> Unit) {
             x = this@FloatingCard.x
             y = this@FloatingCard.y
         }
-        runCatching { wm.addView(card, lp) }.onSuccess { root = card }
+        runCatching { wm.addView(card, lp) }
+            .onSuccess {
+                root = card
+                Log.i(TAG, "[카드] 알림 카드 띄움 ($x, $y): ${m.title}")
+            }
+            .onFailure { Log.w(TAG, "[카드] 알림 카드 실패: ${it.message}", it) }
 
         if (!m.sticky) {
             val task = Runnable { removeNow() }

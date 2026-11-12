@@ -25,7 +25,7 @@ data class ParkingSummary(
 
     /** 가족에게 보낼 요약 (위치 없이 상태만) */
     fun familyText(): String = buildString {
-        appendLine("[Signal Lens] 오늘 운전 요약")
+        appendLine("[운전비서] 오늘 운전 요약")
         items.forEach { (name, problem) -> appendLine("${if (problem) "▲" else "●"} $name") }
         brakeTip?.let { appendLine("브레이크: $it") }
     }.trim()

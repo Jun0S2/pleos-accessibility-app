@@ -86,7 +86,7 @@ fun OnboardScreen(c: AppController, t: Type) {
             .padding(40.dp),
         verticalArrangement = Arrangement.spacedBy(t.gap),
     ) {
-        T("Signal Lens", t.small, Cyan, bold = true)
+        T("운전비서", t.small, Cyan, bold = true)
         if (testing) {
             ColorTest(t) { passed ->
                 testing = false
@@ -206,7 +206,7 @@ private fun DriveMain(c: AppController, t: Type, act: Actions, simShown: Boolean
     val s = c.state
     // 상단: 모드 · 신호 출처 · 속도 · 기어
     Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-        T("Signal Lens", t.small, Cyan, bold = true)
+        T("운전비서", t.small, Cyan, bold = true)
         Pill(c.profile.label, Cyan)
         Pill(if (c.simOn) "테스트 신호" else "차 신호", if (c.simOn) Color(0xFFFFD23F) else Text2)
         Spacer(Modifier.weight(1f))
@@ -293,8 +293,7 @@ private fun gearText(g: Gear) = if (g == Gear.UNKNOWN) "-" else g.name
 
 private fun micClick(c: AppController, act: Actions) {
     c.refreshChecks()
-    if (c.sttStatus.startsWith("마이크 권한")) act.requestMic()
-    c.listen()
+    if (!c.micGranted()) act.requestMic() else c.listen()
 }
 
 /**
@@ -310,7 +309,7 @@ private fun DriveStrip(c: AppController, t: Type, act: Actions) {
             verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                T("Signal Lens", t.small, Cyan, bold = true)
+                T("운전비서", t.small, Cyan, bold = true)
                 Pill(c.profile.label, Cyan)
                 Pill(if (c.simOn) "테스트 신호" else "차 신호", if (c.simOn) Color(0xFFFFD23F) else Text2)
                 Spacer(Modifier.weight(1f))
@@ -384,9 +383,13 @@ fun SimPanel(c: AppController, act: Actions) {
         CheckLine(c.sttStatus.startsWith("음성 인식 준비"), "듣기(마이크)", c.sttStatus)
         CheckLine(c.overlayOk, "지도 위 알림 카드", if (c.overlayOk) "켜짐" else "'다른 앱 위에 표시' 권한이 꺼져 있어요 (README의 adb 명령)")
         VoiceLogView(c, lines = 8)
+        SimLabel("연동 상태 (내비 · 유가 · 날씨)")
+        Text(c.dataStatus, color = Text2, fontSize = 20.sp)
         ChipGrid(
             listOf(
                 Triple("소리 테스트", false) { c.testVoice() },
+                Triple("소리 테스트 (미디어)", false) { c.testVoice(media = true) },
+                Triple("🎤 말해보기", false) { micClick(c, act) },
                 Triple("마이크 권한", false) { act.requestMic() },
                 Triple(if (c.overlayOk) "카드 미리보기" else "카드 권한 켜기", false) {
                     if (c.overlayOk) c.previewFloat() else act.openOverlaySettings()

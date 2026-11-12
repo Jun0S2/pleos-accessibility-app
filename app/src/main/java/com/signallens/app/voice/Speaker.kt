@@ -16,7 +16,11 @@ import java.util.Locale
  *  - 엔진은 있는데 한국어 없음 → 한국어 음성 데이터 설치 필요
  * 음성이 안 되더라도 알림음(띵)은 따로 울린다.
  */
-class Speaker(context: Context, private val onStatus: (String, Boolean) -> Unit) : TextToSpeech.OnInitListener {
+class Speaker(
+    context: Context,
+    private val onLog: (String) -> Unit = {},
+    private val onStatus: (String, Boolean) -> Unit,
+) : TextToSpeech.OnInitListener {
     private val tts = TextToSpeech(context.applicationContext, this)
     private var ready = false
     private var korean = false
@@ -32,12 +36,14 @@ class Speaker(context: Context, private val onStatus: (String, Boolean) -> Unit)
         }
         val engines = tts.engines.joinToString { it.name }
         // 차에서는 '내비 안내 음성'으로 내보내야 음악 위로 들린다
-        tts.setAudioAttributes(
-            AudioAttributes.Builder()
-                .setUsage(AudioAttributes.USAGE_ASSISTANCE_NAVIGATION_GUIDANCE)
-                .setContentType(AudioAttributes.CONTENT_TYPE_SPEECH)
-                .build()
-        )
+        useMediaChannel(false)
+        // 실제로 말했는지 · 실패했는지 로그로 남긴다
+        tts.setOnUtteranceProgressListener(object : android.speech.tts.UtteranceProgressListener() {
+            override fun onStart(id: String?) = onLog("🔊 말하기 시작")
+            override fun onDone(id: String?) = onLog("🔊 말하기 끝")
+            @Deprecated("old API") override fun onError(id: String?) = onLog("🔊 말하기 실패")
+            override fun onError(id: String?, errorCode: Int) = onLog("🔊 말하기 실패 (코드 $errorCode)")
+        })
         korean = pickKorean()
         if (!korean) runCatching { tts.setLanguage(Locale.US) } // 한국어가 없으면 영어로라도 말한다
         tts.setSpeechRate(rate)
@@ -60,11 +66,23 @@ class Speaker(context: Context, private val onStatus: (String, Boolean) -> Unit)
         }
         val voices = runCatching { tts.voices }.getOrNull().orEmpty()
         Log.i(TAG, "목소리 목록: " + voices.joinToString { "${it.name}(${it.locale})" })
+        onLog("음성 엔진 목소리 ${voices.size}개 (한국어 찾는 중)")
         val ko = voices.firstOrNull {
             val l = it.locale.language.lowercase()
             l == "ko" || l == "kor" || it.name.lowercase().startsWith("ko")
         } ?: return false
         return runCatching { tts.setVoice(ko) == TextToSpeech.SUCCESS }.getOrDefault(false)
+    }
+
+    fun useMediaChannel(media: Boolean) {
+        runCatching {
+            tts.setAudioAttributes(
+                AudioAttributes.Builder()
+                    .setUsage(if (media) AudioAttributes.USAGE_MEDIA else AudioAttributes.USAGE_ASSISTANCE_NAVIGATION_GUIDANCE)
+                    .setContentType(AudioAttributes.CONTENT_TYPE_SPEECH)
+                    .build()
+            )
+        }
     }
 
     fun setRate(r: Float) {
@@ -82,13 +100,14 @@ class Speaker(context: Context, private val onStatus: (String, Boolean) -> Unit)
     /** @param en 한국어 음성이 없을 때 대신 읽을 영어 문장 */
     fun speak(text: String, en: String? = null) {
         if (text.isBlank()) return
-        val say = if (korean || !ready) text else (en ?: "Signal Lens. Please check the screen.")
+        val say = if (korean || !ready) text else (en ?: "Please check the screen.")
         if (!ready) {
             pending = text
             pendingEn = en
             return
         }
-        tts.speak(say, TextToSpeech.QUEUE_FLUSH, null, "sl_${System.currentTimeMillis()}")
+        val r = tts.speak(say, TextToSpeech.QUEUE_FLUSH, null, "sl_${System.currentTimeMillis()}")
+        onLog(if (r == TextToSpeech.SUCCESS) "🔊 요청: $say" else "🔊 요청 거절 (코드 $r)")
     }
 
     private var pendingEn: String? = null
